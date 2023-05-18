@@ -1,0 +1,66 @@
+namespace MathInterpreter
+
+
+module Types =
+
+    type Number =
+        | Int of int option
+        | Double of double option
+
+
+
+    module Variables =
+        type Variable = { Name: string; Value: Number }
+
+    module BasicOperations =
+        open Variables
+
+        type Operation =
+            | Add
+            | Add'
+            | Subtract
+            | Subtract'
+            | Multiply
+            | Multiply'
+            | Divide
+            | Divide'
+            | PAP
+            | PAP'
+            | Print
+            | Exit
+            | VCreate of string
+            | VFetch of string
+            | VStore of string
+            | Function of string * string list
+
+        type ProcessElement =
+            | Operation of Operation
+            | Value of Number
+
+    module Functions =
+        open BasicOperations
+
+        type Function =
+            { Name: string
+              Operations: Operation list }
+
+    module Stack = 
+        open Functions    
+        
+        type Stack = { NumberStack: Number list
+            Variables: Variable list
+            Functions: Function list }
+
+    module Errors =
+        open BasicOperations
+        open Variables
+
+
+        type OperationError =
+            | FailedOperationAttempt of Operation * Stack
+            | DivideByZero
+            | UnableToParseInput of string
+            | VariableExistsAlready of string
+            | InvalidVariableType of string
+            | VariableDoesntExist of string
+            | InvalidFunctionDeffinition

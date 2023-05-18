@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "bZ6T1McLIQsKGGx3veI/0oPg1dUZCSXrq8bngbWPY43sQyIzOGA/HavfBJhpkSUm6gBWjYqEAOdP3fsozrV/Yw==",
+  "success": true,
+  "projectFilePath": "C:\\PersonalProjects\\MathInterpreter\\MathInterpreter.fsproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\NathanialLouder\\.nuget\\packages\\fsharp.core\\7.0.200\\fsharp.core.7.0.200.nupkg.sha512"
+  ],
+  "logs": []
+}
