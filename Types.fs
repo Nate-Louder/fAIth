@@ -1,13 +1,10 @@
 namespace MathInterpreter
 
-
 module Types =
 
     type Number =
         | Int of int option
         | Double of double option
-
-
 
     module Variables =
         type Variable = { Name: string; Value: Number }
@@ -44,16 +41,19 @@ module Types =
             { Name: string
               Operations: Operation list }
 
-    module Stack = 
-        open Functions    
-        
-        type Stack = { NumberStack: Number list
-            Variables: Variable list
-            Functions: Function list }
+    module Stack =
+        open Functions
+        open Variables
+
+        type Stack =
+            { NumberStack: Number list
+              Variables: Variable list
+            //Functions: Function list
+            }
 
     module Errors =
         open BasicOperations
-        open Variables
+        open Stack
 
 
         type OperationError =

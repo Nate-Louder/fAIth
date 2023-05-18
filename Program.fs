@@ -4,7 +4,7 @@ open System
 
 module main =
     open Types.BasicOperations
-    open Types.Variables
+    open Types.Stack
     open Types.Errors
     open Operation
     open Parse

@@ -1,10 +1,11 @@
 namespace MathInterpreter
 
 open System
+open Types
 open Types.BasicOperations
 open Types.Variables
 open Types.Errors
-open Types
+open Types.Stack
 open System.Text.RegularExpressions
 
 module NumberOperations =
@@ -162,10 +163,11 @@ module StackOperations =
         Ok stack
 
 module VariableOperations =
+    open Types.Functions
 
     let createVariable name stack =
 
-        match List.tryFind (fun x -> name = x.Name) stack.Variables with
+        match List.tryFind (fun (variable: Variable) -> name = variable.Name) stack.Variables with
         | Some x -> Error <| VariableExistsAlready x.Name
         | None ->
             Ok
@@ -178,7 +180,7 @@ module VariableOperations =
           Variables = variables }
         =
 
-        match List.tryFind (fun variable -> name = variable.Name) variables with
+        match List.tryFind (fun (variable: Variable) -> name = variable.Name) variables with
         | Some matchedVariable ->
             match numbers with
             | Int x :: _ ->
@@ -205,7 +207,7 @@ module VariableOperations =
         { NumberStack = numbers
           Variables = variables }
         =
-        match List.tryFind (fun variable -> name = variable.Name) variables with
+        match List.tryFind (fun (variable: Variable) -> name = variable.Name) variables with
         | Some matchedVariable ->
             Ok
             <| { NumberStack = matchedVariable.Value :: numbers
@@ -241,13 +243,13 @@ module Parse =
             | "PRINT" -> List.append [ Ok <| Operation Print ] (parseOperation y)
             | "EXIT" -> List.append [ Ok <| Operation Exit ] (parseOperation y)
             | "VARIABLE" -> List.append [ Ok <| Operation(VCreate(List.head y)) ] (parseOperation (List.tail y))
-            | "FUN" ->
+            (*| "FUN" ->
                 match y with
                 | y :: ys -> 
                     let name = List.head y
                     let functionOperationsStr =
                     List.append
-                | y :: [] -> Error <| InvalidFunctionDeffinition
+                | y :: [] -> Error <| InvalidFunctionDeffinition*)
             | _ ->
                 match y with
                 | "@" :: _ -> List.append [ Ok <| Operation(VFetch x) ] (parseOperation (List.tail y))
@@ -276,6 +278,7 @@ module Operation =
         | VCreate name -> createVariable name stack
         | VStore name -> storeVariable name stack
         | VFetch name -> fetchVariable name stack
+
 
     let matchSingleOperationType stack processElement =
         match stack with
