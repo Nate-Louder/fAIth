@@ -246,7 +246,10 @@ module Parse =
                 match y with
                 | "@" :: _ -> List.append [ Ok <| Operation(VFetch x) ] (parseOperation (List.tail y))
                 | "!" :: _ -> List.append [ Ok <| Operation(VStore x) ] (parseOperation (List.tail y))
-                | _ -> List.append [ parseNumber x ] (parseOperation y)
+                | _ -> 
+                    match parseNumber x with
+                    | Error _-> List.append [ Ok <| Operation(FUse x) ] (parseOperation y)
+                    | _ -> List.append [parseNumber x] (parseOperation y)
         | _ -> []
 
 module Operation =
