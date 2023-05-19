@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "fAIth", "fAIth\fAIth.fsproj", "{612FBC11-7857-4B8A-875F-4E6D2E855748}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "fAIthConsole", "fAIthConsole\fAIthConsole.fsproj", "{71E48DF3-5D0C-41B1-B452-FCA05C4785CB}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "fAIth.Tests", "fAIth.Tests\fAIth.Tests.fsproj", "{CA68F092-5249-413B-9B4E-5D4BA034D096}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{612FBC11-7857-4B8A-875F-4E6D2E855748}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{612FBC11-7857-4B8A-875F-4E6D2E855748}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{612FBC11-7857-4B8A-875F-4E6D2E855748}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{612FBC11-7857-4B8A-875F-4E6D2E855748}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71E48DF3-5D0C-41B1-B452-FCA05C4785CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71E48DF3-5D0C-41B1-B452-FCA05C4785CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71E48DF3-5D0C-41B1-B452-FCA05C4785CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71E48DF3-5D0C-41B1-B452-FCA05C4785CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA68F092-5249-413B-9B4E-5D4BA034D096}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA68F092-5249-413B-9B4E-5D4BA034D096}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA68F092-5249-413B-9B4E-5D4BA034D096}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA68F092-5249-413B-9B4E-5D4BA034D096}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
