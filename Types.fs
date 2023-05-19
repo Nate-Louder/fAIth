@@ -39,7 +39,7 @@ module Types =
 
         type Function =
             { Name: string
-              Operations: Operation list }
+              Elements: ProcessElement list }
 
     module Stack =
         open Functions
@@ -48,8 +48,7 @@ module Types =
         type Stack =
             { NumberStack: Number list
               Variables: Variable list
-            //Functions: Function list
-            }
+              Functions: Function list }
 
     module Errors =
         open BasicOperations
@@ -64,3 +63,5 @@ module Types =
             | InvalidVariableType of string
             | VariableDoesntExist of string
             | InvalidFunctionDeffinition
+            | FunctionAlreadyExists of string
+            | FunctionDoesntExist of string

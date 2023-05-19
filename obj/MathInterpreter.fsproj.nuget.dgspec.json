@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\PersonalProjects\\MathInterpreter\\MathInterpreter.fsproj": {}
+    "C:\\PersonalProjects\\fAIth\\MathInterpreter.fsproj": {}
   },
   "projects": {
-    "C:\\PersonalProjects\\MathInterpreter\\MathInterpreter.fsproj": {
+    "C:\\PersonalProjects\\fAIth\\MathInterpreter.fsproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\PersonalProjects\\MathInterpreter\\MathInterpreter.fsproj",
+        "projectUniqueName": "C:\\PersonalProjects\\fAIth\\MathInterpreter.fsproj",
         "projectName": "MathInterpreter",
-        "projectPath": "C:\\PersonalProjects\\MathInterpreter\\MathInterpreter.fsproj",
+        "projectPath": "C:\\PersonalProjects\\fAIth\\MathInterpreter.fsproj",
         "packagesPath": "C:\\Users\\NathanialLouder\\.nuget\\packages\\",
-        "outputPath": "C:\\PersonalProjects\\MathInterpreter\\obj\\",
+        "outputPath": "C:\\PersonalProjects\\fAIth\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\NathanialLouder\\AppData\\Roaming\\NuGet\\NuGet.Config"

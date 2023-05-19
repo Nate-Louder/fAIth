@@ -163,55 +163,30 @@ module StackOperations =
         Ok stack
 
 module VariableOperations =
-    open Types.Functions
 
-    let createVariable name stack =
-
-        match List.tryFind (fun (variable: Variable) -> name = variable.Name) stack.Variables with
+    let createVariable name state =
+        match List.tryFind (fun (variable: Variable) -> name = variable.Name) state.Variables with
         | Some x -> Error <| VariableExistsAlready x.Name
-        | None ->
-            Ok
-                { stack with
-                    Variables = List.append stack.Variables [ { Name = name; Value = Int(None) } ] }
+        | None -> Ok { state with Variables = List.append state.Variables [ { Name = name; Value = Int(None) } ] }
 
-    let storeVariable
-        name
-        { NumberStack = numbers
-          Variables = variables }
-        =
-
+    let storeVariable name state =
+        let { NumberStack = numbers; Variables = variables } = state
         match List.tryFind (fun (variable: Variable) -> name = variable.Name) variables with
         | Some matchedVariable ->
             match numbers with
             | Int x :: _ ->
-                Ok
-                <| { NumberStack = List.tail numbers
-                     Variables =
-                       List.append (List.except [ matchedVariable ] variables) [ { Name = name; Value = Int x } ] }
+                Ok <| { state with NumberStack = List.tail numbers; Variables = List.append (List.except [ matchedVariable ] variables) [ { Name = name; Value = Int x } ]}
             | Double x :: _ ->
-                Ok
-                <| { NumberStack = List.tail numbers
-                     Variables =
-                       List.append (List.except [ matchedVariable ] variables) [ { Name = name; Value = Double x } ] }
+                Ok <| {state with NumberStack = List.tail numbers; Variables = List.append (List.except [ matchedVariable ] variables) [ { Name = name; Value = Double x } ]}
             | _ ->
-                Error
-                <| FailedOperationAttempt(
-                    VStore name,
-                    { NumberStack = numbers
-                      Variables = variables }
-                )
+                Error <| FailedOperationAttempt( VStore name, { state with NumberStack = numbers; Variables = variables })
         | _ -> Error <| VariableDoesntExist name
 
-    let fetchVariable
-        name
-        { NumberStack = numbers
-          Variables = variables }
-        =
+    let fetchVariable name state  =
+        let { NumberStack = numbers; Variables = variables } = state
         match List.tryFind (fun (variable: Variable) -> name = variable.Name) variables with
-        | Some matchedVariable ->
-            Ok
-            <| { NumberStack = matchedVariable.Value :: numbers
-                 Variables = variables }
+        | Some matchedVariable -> 
+            Ok <| { state with NumberStack = matchedVariable.Value :: numbers; Variables = variables }
         | _ -> Error <| VariableDoesntExist name
 
 module Parse =
@@ -260,33 +235,52 @@ module Parse =
 module Operation =
     open StackOperations
     open VariableOperations
+    open Functions
 
-    let tryPerformOperarion (stack: Stack) operation =
+    let rec tryPerformOperation state operation =
         match operation with
-        | Add -> add stack
-        | Add' -> add' stack
-        | Subtract -> subtract stack
-        | Subtract' -> subtract' stack
-        | Multiply -> multiply stack
-        | Multiply' -> multiply' stack
-        | Divide -> divide stack
-        | Divide' -> divide' stack
-        | PAP -> popAndPrint stack
-        | PAP' -> popAndPrint' stack
-        | Print -> printStack stack
+        | Add -> add state
+        | Add' -> add' state
+        | Subtract -> subtract state
+        | Subtract' -> subtract' state
+        | Multiply -> multiply state
+        | Multiply' -> multiply' state
+        | Divide -> divide state
+        | Divide' -> divide' state
+        | PAP -> popAndPrint state
+        | PAP' -> popAndPrint' state
+        | Print -> printStack state
         | Exit -> exit 0
-        | VCreate name -> createVariable name stack
-        | VStore name -> storeVariable name stack
-        | VFetch name -> fetchVariable name stack
+        | VCreate name -> createVariable name state
+        | VStore name -> storeVariable name state
+        | VFetch name -> fetchVariable name state
+        | FCreate name elements -> createFunction name elements state
+        | FUse name -> useFunction name state
+        let zero = 0
 
+    and useFunction name state =
+        match List.tryFind (fun func -> func.Name = name) state.Functions with  
+        | Some func -> 
+            match List.fold matchElementType state func.Elements with
+            |Ok x -> state <- Ok x
+            | Error(FailedOperationAttempt(y, x)) ->
+                state <- Ok x // Sets the stack to the stack created before the error occured.
+                printfn "Operation %O failed with parameters %A" y x
+            | Error DivideByZero -> printfn "Cannot divide by zero"
+            | _ -> state <- state
+            
+        | None -> Error <| FunctionDoesntExist name
 
-    let matchSingleOperationType stack processElement =
-        match stack with
+    and createFunction name elements state = 
+        match List.tryFind (fun func -> func.Name = name) state.Functions with
+        | None -> Ok <| { state with Functions = List.append [{ Name = name; Elements = elements}] state.Functions} 
+        | Some _ -> Error <| FunctionAlreadyExists name
+    
+    and matchElementType state processElement =
+        match state with
         | Ok stack ->
             match processElement with
-            | Operation o -> tryPerformOperarion stack o
-            | Value v ->
-                Ok
-                    { stack with
-                        NumberStack = (v :: stack.NumberStack) }
+            | Operation o -> tryPerformOperation stack o
+            | Value v -> Ok { stack with NumberStack = (v :: stack.NumberStack) }
         | Error e -> Error e
+    

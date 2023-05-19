@@ -20,7 +20,7 @@ module main =
                 | Error e -> Error e
             | Error e -> Error e
 
-        let mutable stack = Ok { NumberStack = []; Variables = [] }
+        let mutable stack = Ok { NumberStack = []; Variables = []; Functions = [] }
 
         while true do
             printf "💲 " |> ignore
@@ -35,7 +35,7 @@ module main =
 
             match input with
             | Ok validInput ->
-                match List.fold matchSingleOperationType stack validInput with
+                match List.fold matchElementType stack validInput with
                 | Ok x -> stack <- Ok x
                 | Error(FailedOperationAttempt(y, x)) ->
                     stack <- Ok x // Sets the stack to the stack created before the error occured.
