@@ -12,15 +12,9 @@ module main =
     [<EntryPoint>]
     let main args =
 
-        let operationValidationCheck state element =
-            match state with
-            | Ok xs ->
-                match element with
-                | Ok x -> Ok(List.append xs [ x ])
-                | Error e -> Error e
-            | Error e -> Error e
+        
 
-        let mutable stack = Ok { NumberStack = []; Variables = []; Functions = [] }
+        let mutable state = Ok { NumberStack = []; Variables = []; Functions = [] }
 
         while true do
             printf "💲 " |> ignore
@@ -35,7 +29,7 @@ module main =
 
             match input with
             | Ok validInput ->
-                match List.fold matchElementType stack validInput with
+                match List.fold matchElementType state validInput with
                 | Ok x -> stack <- Ok x
                 | Error(FailedOperationAttempt(y, x)) ->
                     stack <- Ok x // Sets the stack to the stack created before the error occured.

@@ -193,13 +193,29 @@ module Parse =
     open Types.Errors
     open Types.Variables
 
+    let operationValidationCheck state element =
+            match state with
+            | Ok xs ->
+                match element with
+                | Ok x -> Ok(List.append xs [ x ])
+                | Error e -> Error e
+            | Error e -> Error e
+
     let parseNumber (input: string) =
         match Int32.TryParse input with
         | (true, number) -> Ok <| Value(Int <| Some number)
         | (false, _) ->
             match Double.TryParse input with
             | (true, number) -> Ok <| Value(Double <| Some number)
-            | (false, _) -> Error input
+            | (false, _) -> Error <| UnableToParseInput input
+
+    let rec functionOperationsStr lst =
+        match lst with
+        | [] -> ([], [])
+        | "END" :: xs -> ([], xs)
+        | x :: xs -> 
+            let (before, after) = functionOperationsStr xs
+            (x :: before, after)
 
     let rec parseOperation input =
         match input with
@@ -218,13 +234,14 @@ module Parse =
             | "PRINT" -> List.append [ Ok <| Operation Print ] (parseOperation y)
             | "EXIT" -> List.append [ Ok <| Operation Exit ] (parseOperation y)
             | "VARIABLE" -> List.append [ Ok <| Operation(VCreate(List.head y)) ] (parseOperation (List.tail y))
-            (*| "FUN" ->
+            | "FUN" ->
                 match y with
                 | y :: ys -> 
-                    let name = List.head y
-                    let functionOperationsStr =
-                    List.append
-                | y :: [] -> Error <| InvalidFunctionDeffinition*)
+                    let name = y
+                    match functionOperationsStr ys with
+                    | ([], _) -> List.append [Error <| InvalidFunctionDeffinition ] []
+                    | (operations, rest) -> List.append [ Ok <| Operation(FCreate(name, operations)) ] (parseOperation rest)
+                | [] -> List.append [Error <| InvalidFunctionDeffinition ] []
             | _ ->
                 match y with
                 | "@" :: _ -> List.append [ Ok <| Operation(VFetch x) ] (parseOperation (List.tail y))
@@ -236,6 +253,7 @@ module Operation =
     open StackOperations
     open VariableOperations
     open Functions
+    open Parse
 
     let rec tryPerformOperation state operation =
         match operation with
@@ -254,33 +272,39 @@ module Operation =
         | VCreate name -> createVariable name state
         | VStore name -> storeVariable name state
         | VFetch name -> fetchVariable name state
-        | FCreate name elements -> createFunction name elements state
+        | FCreate (name, elements) -> createFunction name elements state
         | FUse name -> useFunction name state
-        let zero = 0
 
     and useFunction name state =
         match List.tryFind (fun func -> func.Name = name) state.Functions with  
         | Some func -> 
-            match List.fold matchElementType state func.Elements with
-            |Ok x -> state <- Ok x
+            match List.fold (fun state element -> matchElementType state element) (Ok state) func.Elements  with
+            | Ok x -> Ok x
             | Error(FailedOperationAttempt(y, x)) ->
-                state <- Ok x // Sets the stack to the stack created before the error occured.
                 printfn "Operation %O failed with parameters %A" y x
-            | Error DivideByZero -> printfn "Cannot divide by zero"
-            | _ -> state <- state
+                Ok state
+            | Error DivideByZero -> 
+                printfn "Cannot divide by zero"
+                Ok state
+            | _ -> Ok state
             
         | None -> Error <| FunctionDoesntExist name
 
-    and createFunction name elements state = 
-        match List.tryFind (fun func -> func.Name = name) state.Functions with
-        | None -> Ok <| { state with Functions = List.append [{ Name = name; Elements = elements}] state.Functions} 
-        | Some _ -> Error <| FunctionAlreadyExists name
+    and createFunction name elementsStr state =
+        match elementsStr
+            |> parseOperation
+            |> List.fold operationValidationCheck (Ok[]) with
+        | Ok elements -> 
+            match List.tryFind (fun func -> func.Name = name) state.Functions with
+            | None -> Ok <| { state with Functions = List.append [{ Name = name; Elements = elements}] state.Functions} 
+            | Some _ -> Error <| FunctionAlreadyExists name
+        | Error e -> Error <| InvalidFunctionDeffinition
     
     and matchElementType state processElement =
         match state with
-        | Ok stack ->
+        | Ok s ->
             match processElement with
-            | Operation o -> tryPerformOperation stack o
-            | Value v -> Ok { stack with NumberStack = (v :: stack.NumberStack) }
+            | Operation o -> tryPerformOperation s o
+            | Value v -> Ok { s with NumberStack = (v :: s.NumberStack) }
         | Error e -> Error e
     

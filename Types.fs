@@ -28,7 +28,8 @@ module Types =
             | VCreate of string
             | VFetch of string
             | VStore of string
-            | Function of string * string list
+            | FCreate of string * string list
+            | FUse of string
 
         type ProcessElement =
             | Operation of Operation
