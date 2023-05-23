@@ -1,4 +1,4 @@
-namespace MathInterpreter
+namespace Faith
 
 module Types =
 
@@ -42,22 +42,22 @@ module Types =
             { Name: string
               Elements: ProcessElement list }
 
-    module Stack =
+    module State =
         open Functions
         open Variables
 
-        type Stack =
+        type State =
             { NumberStack: Number list
               Variables: Variable list
               Functions: Function list }
 
     module Errors =
         open BasicOperations
-        open Stack
+        open State
 
 
         type OperationError =
-            | FailedOperationAttempt of Operation * Stack
+            | FailedOperationAttempt of Operation * State
             | DivideByZero
             | UnableToParseInput of string
             | VariableExistsAlready of string

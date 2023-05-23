@@ -1,11 +1,11 @@
-namespace MathInterpreter
+namespace Faith
 
 open System
 open Types
 open Types.BasicOperations
 open Types.Variables
 open Types.Errors
-open Types.Stack
+open Types.State
 open System.Text.RegularExpressions
 
 module NumberOperations =
@@ -149,7 +149,7 @@ module StackOperations =
             NumberOperations.printfn x
             Ok { stack with NumberStack = xs }
 
-    let popAndPrint' stack : Result<Stack, _> =
+    let popAndPrint' stack : Result<State, _> =
         match stack.NumberStack with
         | [] ->
             printfn "Nothing to pop."
@@ -239,9 +239,9 @@ module Parse =
                 | y :: ys -> 
                     let name = y
                     match functionOperationsStr ys with
-                    | ([], _) -> List.append [Error <| InvalidFunctionDeffinition ] []
+                    | ([], _) -> List.append [ Error <| InvalidFunctionDeffinition ] []
                     | (operations, rest) -> List.append [ Ok <| Operation(FCreate(name, operations)) ] (parseOperation rest)
-                | [] -> List.append [Error <| InvalidFunctionDeffinition ] []
+                | [] -> List.append [ Error <| InvalidFunctionDeffinition ] []
             | _ ->
                 match y with
                 | "@" :: _ -> List.append [ Ok <| Operation(VFetch x) ] (parseOperation (List.tail y))

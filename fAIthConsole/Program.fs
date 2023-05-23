@@ -5,9 +5,9 @@ open System.IO
 
 module Helpers = 
 
-    open Parse
-    open Types.BasicOperations
-    open Types.Errors
+    open Faith.Parse
+    open Faith.Types.BasicOperations
+    open Faith.Types.Errors
     let readFromFile (filePath: string) =
         try
             File.ReadAllLines filePath
@@ -19,51 +19,28 @@ module Helpers =
                 printfn "An error occurred while reading the file: %s" ex.Message
                 [||]
 
-    let splitLine (line: string) =
-        line.Split(" ")
-        |> Array.toList
     let processFile (filePath: string) =
-        let lines = readFromFile filePath
-        let parsedLines =
-            lines
+           filePath
+            |> readFromFile
             |> Array.toList
-            |> List.fold ( fun list line -> List.append list (splitLine line)) [] 
-            |> parseOperation
-
-        parsedLines
-        |> List.fold operationValidationCheck (Ok [])
-
-
+            |> String.concat " "
+            
 module main =
-    open Types.BasicOperations
-    open Types.Stack
-    open Types.Errors
-    open Operation
-    open Parse
+    open Faith.Faith
     open Helpers
 
 
     [<EntryPoint>]
     let main args =
 
-        let mutable state = Ok { NumberStack = []; Variables = []; Functions = [] }
-
         match args with
-        [|filepath|] ->
-            match processFile filepath with
-            | Ok validInput ->
-                match List.fold matchElementType state validInput with
-                | Ok x -> 
-                    state <- Ok x
-                    0
-                | Error err -> 
-                    printfn "%A" err
-                    state <- state
-                    1
-            | Error e -> 
-                printfn "%O" e
-                1
+        [|filepath|] -> 
+            match filepath|> processFile|> faith with
+            | Ok _ -> 
+                0
+            | Error err -> 
+                printfn "%A" err
+                1   
         | _ -> 
-            printfn "Invalid number of arguments. Please provide the file path."
-            1
-
+            faithConsole
+            0
