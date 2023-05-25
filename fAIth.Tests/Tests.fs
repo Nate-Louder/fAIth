@@ -1,8 +1,24 @@
-module Tests
+module Tests =
 
-open System
-open Xunit
+    open Faith.Faith
+    open Faith.Types.State
+    open Console.Helpers
+    open System.IO
+    open Faith.Types
+    open Xunit
 
-[<Fact>]
-let ``My test`` () =
-    Assert.True(true)
+
+    let blankState = {NumberStack=[]; Variables=[]; Functions=[]}
+
+    let fillNumberStack stack = 
+        Ok {blankState with NumberStack=stack}
+
+    [<Fact>]
+    let ``My test`` () =
+
+        let expected = Ok {blankState with NumberStack= []}
+        let actual = faith "7 3 4 5 6 + - * /
+        ."
+        Assert.Equal(expected, actual)
+ 
+ 

@@ -1,13 +1,9 @@
-﻿namespace MathInterpreter
+﻿namespace Console
 
-open System
 open System.IO
 
 module Helpers = 
 
-    open Faith.Parse
-    open Faith.Types.BasicOperations
-    open Faith.Types.Errors
     let readFromFile (filePath: string) =
         try
             File.ReadAllLines filePath
