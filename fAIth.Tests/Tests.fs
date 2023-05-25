@@ -16,7 +16,7 @@ module Tests =
     [<Fact>]
     let ``My test`` () =
 
-        let expected = fillNumberStack [Int (Some(3))]
+        let expected = fillNumberStack [Int 3]
         let actual = faith "7 3 4 5 6 + - * /
         ."
         Assert.Equal(expected, actual)

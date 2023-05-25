@@ -3,11 +3,11 @@ namespace Faith
 module Types =
 
     type Number =
-        | Int of int option
-        | Double of double option
+        | Int of int
+        | Double of double
 
     module Variables =
-        type Variable = { Name: string; Value: Number }
+        type Variable = { Name: string; Value: (Number option) }
 
     module BasicOperations =
         open Variables
@@ -66,3 +66,4 @@ module Types =
             | InvalidFunctionDeffinition
             | FunctionAlreadyExists of string
             | FunctionDoesntExist of string
+            | UnassignedVariableError of string

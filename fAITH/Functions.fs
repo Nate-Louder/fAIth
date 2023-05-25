@@ -11,41 +11,37 @@ open System.Text.RegularExpressions
 module NumberOperations =
     let add (number1: Number) (number2: Number) : Number =
         match number1, number2 with
-        | Int(Some x), Int(Some y) -> Int <| Some(x + y)
-        | Double(Some x), Double(Some y) -> Double <| Some(x + y)
-        | Int(Some x), Double(Some y) -> Double <| Some(double (x) + y)
-        | Double(Some x), Int(Some y) -> Double <| Some(x + double (y))
-        | _ -> Double None
+        | Int(x), Int(y) -> Int <| x + y
+        | Double(x), Double(y) -> Double <| x + y
+        | Int(x), Double(y) -> Double <| double (x) + y
+        | Double(x), Int(y) -> Double <| x + double (y)
 
     let subtract (number1: Number) (number2: Number) : Number =
         match number1, number2 with
-        | Int(Some x), Int(Some y) -> Int <| Some(x - y)
-        | Double(Some x), Double(Some y) -> Double <| Some(x - y)
-        | Int(Some x), Double(Some y) -> Double <| Some(double (x) - y)
-        | Double(Some x), Int(Some y) -> Double <| Some(x - double (y))
-        | _ -> Double None
+        | Int(x), Int(y) -> Int <| x - y
+        | Double(x), Double(y) -> Double <| x - y
+        | Int(x), Double(y) -> Double <| double (x) - y
+        | Double(x), Int(y) -> Double <| x - double (y)
 
     let multiply (number1: Number) (number2: Number) : Number =
         match number1, number2 with
-        | Int(Some x), Int(Some y) -> Int <| Some(x * y)
-        | Double(Some x), Double(Some y) -> Double <| Some(x * y)
-        | Int(Some x), Double(Some y) -> Double <| Some(double (x) * y)
-        | Double(Some x), Int(Some y) -> Double <| Some(x * double (y))
-        | _ -> Double None
+        | Int(x), Int(y) -> Int <| x * y
+        | Double(x), Double(y) -> Double <| x * y
+        | Int(x), Double(y) -> Double <| double (x) * y
+        | Double(x), Int(y) -> Double <| x * double (y)
+
 
     let divide (number1: Number) (number2: Number) =
         match number1, number2 with
-        | Int(Some x), Int(Some y) -> Int <| Some(x / y)
-        | Double(Some x), Double(Some y) -> Double <| Some(x / y)
-        | Int(Some x), Double(Some y) -> Double <| Some(double (x) / y)
-        | Double(Some x), Int(Some y) -> Double <| Some(x / double (y))
-        | _ -> Double None
+        | Int(x), Int(y) -> Int <| x / y
+        | Double(x), Double(y) -> Double <| x / y
+        | Int(x), Double(y) -> Double <| double (x) / y
+        | Double(x), Int(y) -> Double <| x / double (y)
 
     let printfn number =
         match number with
-        | Int(Some x) -> printfn "%i" x
-        | Double(Some x) -> printfn "%f" x
-        | _ -> ()
+        | Int(x) -> printfn "%i" x
+        | Double(x) -> printfn "%f" x
 
 module StackOperations =
     let head list = List.head list
@@ -114,8 +110,8 @@ module StackOperations =
         | x :: [] -> Error <| FailedOperationAttempt(Divide, stack)
         | x :: (y :: ys) ->
             match y with
-            | Int(Some 0) -> Error <| DivideByZero
-            | Double(Some 0.) -> Error <| DivideByZero
+            | Int(0) -> Error <| DivideByZero
+            | Double(0.) -> Error <| DivideByZero
             | _ ->
                 Ok
                     { stack with
@@ -131,8 +127,8 @@ module StackOperations =
                     (fun quotient element ->
                         match quotient, element with
                         | Error err, _ -> Error err
-                        | Ok _, Int(Some 0) -> Error <| DivideByZero
-                        | Ok _, Double(Some 0.) -> Error <| DivideByZero
+                        | Ok _, Int(0) -> Error <| DivideByZero
+                        | Ok _, Double(0.) -> Error <| DivideByZero
                         | Ok q, e -> Ok(NumberOperations.divide q e))
                     (Ok x)
                     xs
@@ -166,18 +162,18 @@ module VariableOperations =
 
     let createVariable name state =
         match List.tryFind (fun (variable: Variable) -> name = variable.Name) state.Variables with
-        | Some x -> Error <| VariableExistsAlready x.Name
-        | None -> Ok { state with Variables = List.append state.Variables [ { Name = name; Value = Int(None) } ] }
+        | Some(x) -> Error <| VariableExistsAlready x.Name
+        | None -> Ok { state with Variables = List.append state.Variables [ { Name = name; Value = None } ] }
 
     let storeVariable name state =
         let { NumberStack = numbers; Variables = variables } = state
         match List.tryFind (fun (variable: Variable) -> name = variable.Name) variables with
-        | Some matchedVariable ->
+        | Some(matchedVariable) ->
             match numbers with
             | Int x :: _ ->
-                Ok <| { state with NumberStack = List.tail numbers; Variables = List.append (List.except [ matchedVariable ] variables) [ { Name = name; Value = Int x } ]}
+                Ok <| { state with NumberStack = List.tail numbers; Variables = List.append (List.except [ matchedVariable ] variables) [ { Name = name; Value = Some(Int x) } ]}
             | Double x :: _ ->
-                Ok <| {state with NumberStack = List.tail numbers; Variables = List.append (List.except [ matchedVariable ] variables) [ { Name = name; Value = Double x } ]}
+                Ok <| {state with NumberStack = List.tail numbers; Variables = List.append (List.except [ matchedVariable ] variables) [ { Name = name; Value = Some(Double x) } ]}
             | _ ->
                 Error <| FailedOperationAttempt( VStore name, { state with NumberStack = numbers; Variables = variables })
         | _ -> Error <| VariableDoesntExist name
@@ -185,8 +181,10 @@ module VariableOperations =
     let fetchVariable name state  =
         let { NumberStack = numbers; Variables = variables } = state
         match List.tryFind (fun (variable: Variable) -> name = variable.Name) variables with
-        | Some matchedVariable -> 
-            Ok <| { state with NumberStack = matchedVariable.Value :: numbers; Variables = variables }
+        | Some(matchedVariable) -> 
+            match matchedVariable.Value with
+            | Some(v) -> Ok <| { state with NumberStack = v :: numbers; Variables = variables }
+            | None -> Error <| UnassignedVariableError matchedVariable.Name
         | _ -> Error <| VariableDoesntExist name
 
 module Parse =
@@ -203,10 +201,10 @@ module Parse =
 
     let parseNumber (input: string) =
         match Int32.TryParse input with
-        | (true, number) -> Ok <| Value(Int <| Some number)
+        | (true, number) -> Ok <| Value(Int <| number)
         | (false, _) ->
             match Double.TryParse input with
-            | (true, number) -> Ok <| Value(Double <| Some number)
+            | (true, number) -> Ok <| Value(Double <| number)
             | (false, _) -> Error <| UnableToParseInput input
 
     let rec functionOperationsStr lst =
@@ -280,7 +278,7 @@ module Operation =
 
     and useFunction name state =
         match List.tryFind (fun func -> func.Name = name) state.Functions with  
-        | Some func -> 
+        | Some(func) -> 
             match List.fold (fun state element -> matchElementType state element) (Ok state) func.Elements  with
             | Ok x -> Ok x
             | Error(FailedOperationAttempt(y, x)) ->
@@ -300,7 +298,7 @@ module Operation =
         | Ok elements -> 
             match List.tryFind (fun func -> func.Name = name) state.Functions with
             | None -> Ok <| { state with Functions = List.append [{ Name = name; Elements = elements}] state.Functions} 
-            | Some _ -> Error <| FunctionAlreadyExists name
+            | _ -> Error <| FunctionAlreadyExists name
         | Error e -> Error <| InvalidFunctionDeffinition
     
     and matchElementType state processElement =
