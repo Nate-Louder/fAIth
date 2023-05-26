@@ -49,7 +49,9 @@ module Types =
         type State =
             { NumberStack: Number list
               Variables: Variable list
-              Functions: Function list }
+              Functions: Function list 
+              Depth: int
+            }
 
     module Errors =
         open BasicOperations
@@ -57,6 +59,7 @@ module Types =
 
 
         type OperationError =
+            | StackOverFlow
             | FailedOperationAttempt of Operation * State
             | DivideByZero
             | UnableToParseInput of string

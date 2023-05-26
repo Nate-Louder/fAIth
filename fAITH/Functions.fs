@@ -8,6 +8,9 @@ open Types.Errors
 open Types.State
 open System.Text.RegularExpressions
 
+module Constants = 
+    let CallStackMaxDepth = 100
+
 module NumberOperations =
     let add (number1: Number) (number2: Number) : Number =
         match number1, number2 with
@@ -256,27 +259,35 @@ module Operation =
     open Functions
     open Parse
 
+    let performOperation operation state =
+        try 
+            operation state
+        with 
+        | :? StackOverflowException -> Error <| StackOverFlow
+
     let rec tryPerformOperation state operation =
         match operation with
-        | Add -> add state
-        | Add' -> add' state
-        | Subtract -> subtract state
-        | Subtract' -> subtract' state
-        | Multiply -> multiply state
-        | Multiply' -> multiply' state
-        | Divide -> divide state
-        | Divide' -> divide' state
-        | PAP -> popAndPrint state
-        | PAP' -> popAndPrint' state
-        | Print -> printStack state
-        | Exit -> exit 0
+        | Add -> performOperation add state
+        | Add' -> performOperation add' state
+        | Subtract -> performOperation subtract state
+        | Subtract' -> performOperation subtract' state
+        | Multiply -> performOperation multiply state
+        | Multiply' -> performOperation multiply' state
+        | Divide -> performOperation divide state
+        | Divide' -> performOperation divide' state
+        | PAP -> performOperation popAndPrint state
+        | PAP' -> performOperation popAndPrint' state
+        | Print -> performOperation printStack state
+        | Exit -> performOperation exit 0
         | VCreate name -> createVariable name state
         | VStore name -> storeVariable name state
         | VFetch name -> fetchVariable name state
         | FCreate (name, elements) -> createFunction name elements state
         | FUse name -> useFunction name state
 
+
     and useFunction name state =
+
         match List.tryFind (fun func -> func.Name = name) state.Functions with  
         | Some(func) -> 
             match List.fold (fun state element -> matchElementType state element) (Ok state) func.Elements  with
@@ -288,8 +299,8 @@ module Operation =
                 printfn "Cannot divide by zero"
                 Ok state
             | _ -> Ok state
-            
         | None -> Error <| FunctionDoesntExist name
+        
 
     and createFunction name elementsStr state =
         match elementsStr
@@ -305,7 +316,18 @@ module Operation =
         match state with
         | Ok s ->
             match processElement with
-            | Operation o -> tryPerformOperation s o
-            | Value v -> Ok { s with NumberStack = (v :: s.NumberStack) }
+            | Operation o -> 
+                match o with 
+                | FUse _ -> 
+                    if s.Depth <= Constants.CallStackMaxDepth then
+                        tryPerformOperation {s with Depth = s.Depth + 1} o
+                    else
+                        Error <| StackOverFlow
+                | _ ->
+                    if s.Depth <= Constants.CallStackMaxDepth then
+                        tryPerformOperation s o
+                    else
+                        Error <| StackOverFlow
+            | Value v -> Ok { s with NumberStack = (v :: s.NumberStack);}
         | Error e -> Error e
     

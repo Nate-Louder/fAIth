@@ -13,7 +13,7 @@ module Helpers =
 
     let processInput input =
        
-        let state = Ok { NumberStack = []; Variables = []; Functions = [] }
+        let state = Ok { NumberStack = []; Variables = []; Functions = []; Depth = 0 }
 
         let inputList = 
             splitLine input
@@ -29,7 +29,7 @@ module Helpers =
 
     let processInputConsole =
        
-        let mutable state = Ok { NumberStack = []; Variables = []; Functions = [] }
+        let mutable state = Ok { NumberStack = []; Variables = []; Functions = []; Depth = 0}
         
         while true do 
             printf "💲 "
