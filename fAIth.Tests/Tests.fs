@@ -8,7 +8,7 @@ module Tests =
     open Xunit
 
 
-    let blankState = {NumberStack=[]; Variables=[]; Functions=[]}
+    let blankState = {NumberStack=[]; Variables=[]; Functions=[]; Depth = 0}
 
     let fillNumberStack stack = 
         Ok {blankState with NumberStack=stack}
